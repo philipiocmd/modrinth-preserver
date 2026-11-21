@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modrinth + CurseForge Bulk Downloader</title>
+<style>
+:root{color-scheme:dark;--bg:#101310;--panel:#191f1a;--panel2:#202820;--line:#303b31;--text:#edf4ed;--muted:#9eaa9e;--green:#1bd96a;--green2:#13b957;--red:#ff6b6b;--orange:#f4b942}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#203b29 0%,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1120px;margin:auto;padding:42px 22px 70px}.top{display:flex;align-items:center;gap:13px;margin-bottom:34px}.logo{width:44px;height:44px;border-radius:13px;background:var(--green);color:#092211;display:grid;place-items:center;font-size:24px;font-weight:900;box-shadow:0 8px 30px #1bd96a30}.brand{font-weight:800;font-size:18px}.brand small{display:block;color:var(--muted);font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.1;letter-spacing:-1.5px;margin:0 0 12px}.intro{color:var(--muted);max-width:700px;margin:0 0 28px}.panel{background:linear-gradient(145deg,#1c241e,#171d18);border:1px solid var(--line);border-radius:18px;padding:23px;margin:18px 0;box-shadow:0 15px 45px #0002}.panel h2{font-size:17px;margin:0 0 5px}.sub{color:var(--muted);font-size:13px;margin:0 0 17px}
+.inputrow{display:flex;gap:10px}.inputrow input{flex:1;min-width:0}.field, input[type=text]{background:#0f1510;border:1px solid #39463a;border-radius:10px;padding:13px 14px;color:var(--text);font:inherit;outline:none}.field:focus,input:focus{border-color:var(--green);box-shadow:0 0 0 3px #1bd96a18}button{border:0;border-radius:10px;padding:12px 17px;background:var(--green);color:#082110;font-weight:800;font:inherit;cursor:pointer;transition:.15s}button:hover{background:#45ed89;transform:translateY(-1px)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}.secondary{background:#2b352c;color:var(--text);border:1px solid #3b493d}.secondary:hover{background:#354236}.danger{color:#ffb4b4;background:#3b2424;border:1px solid #653535}.status{margin-top:13px;color:var(--muted);font-size:13px;min-height:20px}.status.error{color:var(--red)}.status.good{color:var(--green)}
+#project{display:none}.projecthead{display:flex;gap:15px;align-items:center}.projecticon{width:58px;height:58px;border-radius:13px;object-fit:cover;background:#29332a}.projecttitle{font-size:22px;font-weight:800}.projectmeta{font-size:13px;color:var(--muted)}.stats{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.stat{background:#111812;border:1px solid var(--line);border-radius:9px;padding:8px 11px;color:var(--muted);font-size:12px}.stat b{color:var(--text);font-size:15px;margin-right:4px}
+.filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:18px}.filterbox{background:#111812;border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:0}.filtertop{padding:12px 13px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}.filtertop strong{font-size:14px}.filter-actions{display:flex;gap:8px}.textbtn{padding:0;background:none;color:var(--green);font-size:12px;font-weight:700}.textbtn:hover{background:none;text-decoration:underline;transform:none}.filtersearch{width:calc(100% - 20px);margin:10px 10px 2px;padding:8px 10px;font-size:13px}.options{padding:7px 10px 11px;max-height:270px;overflow:auto}.opt{display:flex;align-items:center;gap:9px;padding:6px 4px;color:#dce5dc;font-size:13px;cursor:pointer;border-radius:6px}.opt:hover{background:#202a21}.opt input{accent-color:var(--green);width:15px;height:15px;margin:0}.count{font-size:11px;color:var(--muted);margin-left:auto}.filterfoot{padding:8px 12px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:19px}.toolbar .left{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.match{font-weight:750}.hint{font-size:12px;color:var(--muted)}.downloadbox{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.downloadbox button{min-width:190px}.progresswrap{flex:1;min-width:180px}.progress{height:8px;border-radius:20px;background:#303a31;overflow:hidden}.bar{height:100%;width:0;background:var(--green);transition:width .2s}.progresslabel{font-size:12px;color:var(--muted);margin-top:6px}
+.versions{margin-top:15px;border-top:1px solid var(--line);padding-top:14px}.versions summary{cursor:pointer;color:#c9d5c9;font-size:13px;font-weight:700}.versionlist{max-height:230px;overflow:auto;margin-top:10px}.versionrow{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:10px;padding:8px 5px;border-bottom:1px solid #293229;font-size:12px}.versionrow span{overflow-wrap:anywhere}.muted{color:var(--muted)}
+footer{color:#778477;text-align:center;font-size:12px;margin-top:28px}a{color:var(--green)}
+@media(max-width:760px){.filters{grid-template-columns:1fr}.options{max-height:220px}.inputrow{flex-direction:column}.inputrow button{width:100%}.panel{padding:17px}.wrap{padding:25px 14px 50px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><div class="logo">M</div><div class="brand">Modrinth + CurseForge Downloader<small>Community utility</small></div></div>
+ <h1>Every version.<br><span style="color:var(--green)">One download.</span></h1>
+ <p class="intro">Paste a Modrinth or CurseForge mod link, filter releases by Minecraft version, mod version and loader, then bundle the matching files into one ZIP.</p>
+ <section class="panel">
+  <h2>1. Enter a mod project</h2><p class="sub">Paste a Modrinth or CurseForge URL, or enter its project slug/ID. The platform is detected automatically.</p>
+  <div class="inputrow"><input id="projectInput" class="field" type="text" placeholder="https://modrinth.com/mod/sodium or CurseForge link" autocomplete="off"><button id="loadBtn">Load project →</button></div>
+  <div id="cfKeyBox" style="display:none;margin-top:14px;padding:14px;background:#111812;border:1px solid var(--line);border-radius:11px">
+   <label for="cfKey" style="display:block;font-size:13px;font-weight:700;margin-bottom:7px">CurseForge API key</label>
+   <input id="cfKey" class="field" type="password" placeholder="Paste your CurseForge API key" autocomplete="off" style="width:100%">
+   <div class="hint" style="margin-top:7px">Required for CurseForge. It is only kept in this page's memory and sent to CurseForge; it is not saved or shared with Modrinth.</div>
+   <div class="hint" style="margin-top:5px"><a href="https://docs.curseforge.com/rest-api/" target="_blank" rel="noopener">CurseForge API documentation</a> · API access requires approval.</div>
+  </div>
+  <div id="loadStatus" class="status" role="status"></div>
+ </section>
+ <section id="project" class="panel">
+  <div class="projecthead"><img id="projectIcon" class="projecticon" alt="" hidden><div><div id="projectTitle" class="projecttitle"></div><div id="projectMeta" class="projectmeta"></div></div></div>
+  <div class="stats"><div class="stat"><b id="releaseCount">0</b> releases</div><div class="stat"><b id="fileCount">0</b> files</div><div class="stat"><b id="gameCount">0</b> Minecraft versions</div><div class="stat"><b id="loaderCount">0</b> loaders</div></div>
+  <div style="margin-top:23px"><h2>2. Choose what to include</h2><p class="sub">Selections are combined: a release is included when it matches your chosen mod version, at least one selected Minecraft version, and at least one selected loader. Leave all checked to include everything available.</p></div>
+  <div class="filters">
+   <div class="filterbox"><div class="filtertop"><strong>Mod versions</strong><div class="filter-actions"><button class="textbtn" data-all="mod">All</button><button class="textbtn" data-none="mod">None</button></div></div><input class="field filtersearch" id="searchMod" type="text" placeholder="Search versions…"><div class="options" id="modOptions"></div><div class="filterfoot" id="modFoot"></div></div>
+   <div class="filterbox"><div class="filtertop"><strong>Minecraft versions</strong><div class="filter-actions"><button class="textbtn" data-all="game">All</button><button class="textbtn" data-none="game">None</button></div></div><input class="field filtersearch" id="searchGame" type="text" placeholder="Search versions…"><div class="options" id="gameOptions"></div><div class="filterfoot" id="gameFoot"></div></div>
+   <div class="filterbox"><div class="filtertop"><strong>Loaders</strong><div class="filter-actions"><button class="textbtn" data-all="loader">All</button><button class="textbtn" data-none="loader">None</button></div></div><input class="field filtersearch" id="searchLoader" type="text" placeholder="Search loaders…"><div class="options" id="loaderOptions"></div><div class="filterfoot" id="loaderFoot"></div></div>
+  </div>
+  <div class="toolbar"><div class="left"><button class="secondary" id="selectAll">Select all</button><button class="secondary" id="clearAll">Clear all</button><span class="hint">Filters update automatically</span></div><div class="match" id="matchCount">0 matching files</div></div>
+  <div class="versions"><details><summary>Preview matching releases</summary><div id="versionPreview" class="versionlist"></div></details></div>
+  <div class="downloadbox"><button id="downloadBtn" disabled>Download ZIP ↓</button><div class="progresswrap"><div class="progress"><div id="progressBar" class="bar"></div></div><div id="progressLabel" class="progresslabel">Ready when you are.</div></div></div>
+  <div id="downloadStatus" class="status" role="status"></div>
+ </section>
+ <footer>Uses the Modrinth and CurseForge APIs. ZIP creation runs in your browser. CurseForge requires an approved API key.</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+const API='https://api.modrinth.com/v2';
+const CF_API='https://api.curseforge.com/v1';
+const CF_LOADERS={Forge:1,Cauldron:2,LiteLoader:3,Fabric:4,Quilt:5,NeoForge:6};
+const CF_LOADER_NAMES=Object.keys(CF_LOADERS);
+let platform='modrinth', curseModId=null;
+const $=id=>document.getElementById(id);
+let projectData=null, releases=[], filters={mod:new Set(),game:new Set(),loader:new Set()}, choices={mod:[],game:[],loader:[]}, matching=[];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function slugify(s){return String(s||'mod').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'mod'}
+function cleanName(s){return String(s||'').replace(/[\\/:*?"<>|]/g,'-').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'')}
+function status(id,msg,type=''){const el=$(id);el.textContent=msg;el.className='status '+type}
+function detectProject(input){
+ let s=input.trim(); if(!s)throw Error('Enter a Modrinth or CurseForge project URL, slug or ID.');
+ if(/^https?:\/\//i.test(s)){
+  let u;try{u=new URL(s)}catch{throw Error('That link is not valid.')}
+  const host=u.hostname.toLowerCase(),parts=u.pathname.split('/').filter(Boolean);
+  if(host==='modrinth.com'||host.endsWith('.modrinth.com')){
+   if(parts.length<2||!['mod','plugin','datapack','resourcepack','shader','project'].includes(parts[0]))throw Error('Could not find a Modrinth project slug in that link.');
+   return {platform:'modrinth',id:decodeURIComponent(parts[1])};
+  }
+  if(host==='curseforge.com'||host.endsWith('.curseforge.com')){
+   const idx=parts.findIndex(x=>x==='mc-mods'||x==='minecraft');
+   let slug=idx>=0?(parts[idx]==='mc-mods'?parts[idx+1]:parts[idx+2]):null;
+   if(!slug)throw Error('Use a CurseForge Minecraft mod page URL, such as curseforge.com/minecraft/mc-mods/sodium.');
+   return {platform:'curseforge',id:decodeURIComponent(slug)};
+  }
+  throw Error('Use a Modrinth or CurseForge project link.');
+ }
+ if(s.includes('/')||/\s/.test(s))throw Error('Enter a project slug/ID or a valid project URL.');
+ if(/^\d+$/.test(s))return {platform:'curseforge',id:s};
+ return {platform:'modrinth',id:s};
+}
+async function api(url){const r=await fetch(url,{headers:{'User-Agent':'ModrinthBulkDownloader/1.0 (browser utility)'}});if(!r.ok){let detail='';try{detail=(await r.json()).description||''}catch{}throw Error(detail||`Modrinth API returned ${r.status} ${r.statusText}.`)}return r.json()}
+async function cfApi(url,key){
+ const r=await fetch(url,{headers:{'Accept':'application/json','x-api-key':key}});
+ let data={};try{data=await r.json()}catch{}
+ if(!r.ok)throw Error(data.message||data.error||`CurseForge API returned ${r.status} ${r.statusText}. Check your API key and access.`);
+ return data;
+}
+function cfLoaderTags(tags){
+ const lower=tags.map(x=>String(x).toLowerCase());
+ return CF_LOADER_NAMES.filter(name=>lower.some(x=>x===name.toLowerCase()||x.includes(name.toLowerCase())));
+}
+async function loadCurseForge(slug,key){
+ let mod;
+ if(/^\\d+$/.test(slug)){
+  const r=await cfApi(`${CF_API}/mods/${slug}`,key);mod=r.data;
+ }else{
+  const q=new URLSearchParams({gameId:'432',classId:'6',slug:slug,pageSize:'1'});
+  const r=await cfApi(`${CF_API}/mods/search?${q}`,key);mod=(r.data||[])[0];
+ }
+ if(!mod)throw Error('Could not find that CurseForge Minecraft mod. Check the link or slug.');
+ const all=[];let index=0,total=Infinity;
+ while(index<total&&index<10000){
+  const q=new URLSearchParams({index:String(index),pageSize:'50'});
+  const r=await cfApi(`${CF_API}/mods/${mod.id}/files?${q}`,key);
+  const batch=r.data||[];all.push(...batch);
+  total=r.pagination?.totalCount??all.length;
+  if(!batch.length)break;
+  index+=batch.length;
+ }
+ if(!all.length)throw Error('This CurseForge project has no files available through the API.');
+ const normalized=all.filter(f=>f.isAvailable!==false).map(f=>{
+  const tags=f.gameVersions||[];
+  const loaders=cfLoaderTags(tags);
+  const games=tags.filter(t=>!cfLoaderTags([t]).length);
+  const rawName=f.displayName||f.fileName||`File ${f.id}`;
+  const version=String(rawName).replace(/\.(jar|zip|mrpack)$/i,'');
+  return {
+   id:f.id,version_number:version,version_type:({1:'release',2:'beta',3:'alpha'})[f.releaseType]||'file',
+   game_versions:games,loaders:loaders.length?loaders:['Unknown'],
+   files:[{url:f.downloadUrl||null,filename:f.fileName||rawName,cfFileId:f.id,cfModId:mod.id,cfKey:key}],
+   _cf:f
+  };
+ });
+ projectData={id:String(mod.id),slug:mod.slug,title:mod.name,project_type:'CurseForge mod',author:(mod.authors||[]).map(a=>a.name).join(', '),icon_url:mod.logo?.url||mod.logo?.thumbnailUrl||''};
+ curseModId=mod.id;
+ return normalized;
+}
+function sortVersions(a,b){return a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'})}
+async function loadProject(){
+ $('loadBtn').disabled=true;$('project').style.display='none';status('loadStatus','Detecting platform and contacting API…');
+ try{
+  const detected=detectProject($('projectInput').value);platform=detected.platform;
+  $('cfKeyBox').style.display=platform==='curseforge'?'block':'none';
+  if(platform==='curseforge'){
+   const key=$('cfKey').value.trim();
+   if(!key)throw Error('CurseForge requires an API key. Enter it in the API key box below the link.');
+   releases=await loadCurseForge(detected.id,key);
+  }else{
+   projectData=await api(`${API}/project/${encodeURIComponent(detected.id)}`);
+   releases=await api(`${API}/project/${encodeURIComponent(projectData.id)}/version`);
+   if(!Array.isArray(releases)||!releases.length)throw Error('This project has no published versions.');
+  }
+  const mods=[...new Set(releases.map(v=>v.version_number).filter(Boolean))].sort(sortVersions);
+  const games=[...new Set(releases.flatMap(v=>v.game_versions||[]))].sort(sortVersions);
+  const loaders=[...new Set(releases.flatMap(v=>v.loaders||[]))].sort((a,b)=>a.localeCompare(b));
+  choices={mod:mods,game:games,loader:loaders};filters={mod:new Set(mods),game:new Set(games),loader:new Set(loaders)};
+  $('projectTitle').textContent=projectData.title||projectData.slug;
+  $('projectMeta').textContent=`${projectData.slug} · ${projectData.project_type||'project'} · ${projectData.author||'Unknown author'} · ${platform==='curseforge'?'CurseForge':'Modrinth'}`;
+  if(projectData.icon_url){$('projectIcon').src=projectData.icon_url;$('projectIcon').hidden=false}else $('projectIcon').hidden=true;
+  $('releaseCount').textContent=releases.length;
+  $('fileCount').textContent=releases.reduce((n,v)=>n+(v.files||[]).length,0);
+  $('gameCount').textContent=games.length;$('loaderCount').textContent=loaders.length;
+  renderFilters();$('project').style.display='block';status('loadStatus',`${platform==='curseforge'?'CurseForge':'Modrinth'} project loaded successfully.`,'good');status('downloadStatus','');
+  updateMatches();$('project').scrollIntoView({behavior:'smooth',block:'start'});
+ }catch(e){status('loadStatus',e.message,'error')}finally{$('loadBtn').disabled=false}
+}
+function renderFilters(){
+ for(const type of ['mod','game','loader']){
+  const root=$(type+'Options');root.innerHTML='';
+  choices[type].forEach((v,i)=>{const label=document.createElement('label');label.className='opt';label.dataset.value=v.toLowerCase();label.innerHTML=`<input type="checkbox" data-type="${type}" value="${esc(v)}" checked><span>${esc(v)}</span>`;root.appendChild(label)});
+  $(type+'Foot').textContent=`${choices[type].length} available`;
+  $('search'+type[0].toUpperCase()+type.slice(1)).value='';
+ }
+}
+function getVisibleFilters(){return {mod:filters.mod,game:filters.game,loader:filters.loader}}
+function updateMatches(){
+ if(!projectData)return;
+ const f=getVisibleFilters();
+ matching=releases.filter(v=>f.mod.has(v.version_number)&&(v.game_versions||[]).some(x=>f.game.has(x))&&(v.loaders||[]).some(x=>f.loader.has(x))&&(v.files||[]).length);
+ const files=matching.reduce((n,v)=>n+(v.files||[]).length,0);
+ $('matchCount').textContent=`${files} matching file${files===1?'':'s'}`;$('downloadBtn').disabled=files===0;
+ $('versionPreview').innerHTML=matching.slice(0,120).map(v=>`<div class="versionrow"><span><b>${esc(v.version_number)}</b><br><span class="muted">${esc(v.version_type||'release')}</span></span><span>${esc((v.game_versions||[]).filter(x=>f.game.has(x)).join(', ')||'—')}</span><span>${esc((v.loaders||[]).filter(x=>f.loader.has(x)).join(', '))}</span></div>`).join('')+(matching.length>120?`<div class="muted">Showing first 120 of ${matching.length} matching releases.</div>`:'');
+}
+function setFilter(type,value,checked){if(checked)filters[type].add(value);else filters[type].delete(value);updateMatches()}
+document.addEventListener('change',e=>{if(e.target.matches('input[type=checkbox][data-type]'))setFilter(e.target.dataset.type,e.target.value,e.target.checked)});
+for(const type of ['mod','game','loader']){
+ $('search'+type[0].toUpperCase()+type.slice(1)).addEventListener('input',e=>{const q=e.target.value.toLowerCase();$(type+'Options').querySelectorAll('.opt').forEach(el=>el.hidden=!el.dataset.value.includes(q))});
+}
+document.querySelectorAll('[data-all],[data-none]').forEach(btn=>btn.addEventListener('click',()=>{const type=btn.dataset.all||btn.dataset.none;filters[type]=new Set(btn.dataset.all?choices[type]:[]);$(type+'Options').querySelectorAll('input').forEach(x=>x.checked=btn.dataset.all!==undefined);updateMatches()}));
+$('selectAll').onclick=()=>{for(const t of Object.keys(filters)){filters[t]=new Set(choices[t]);$(t+'Options').querySelectorAll('input').forEach(x=>x.checked=true)}updateMatches()};
+$('clearAll').onclick=()=>{for(const t of Object.keys(filters)){filters[t].clear();$(t+'Options').querySelectorAll('input').forEach(x=>x.checked=false)}updateMatches()};
+$('loadBtn').onclick=loadProject;$('projectInput').addEventListener('input',()=>{try{$('cfKeyBox').style.display=detectProject($('projectInput').value).platform==='curseforge'?'block':'none'}catch{$('cfKeyBox').style.display='none'}});$('projectInput').addEventListener('keydown',e=>{if(e.key==='Enter')loadProject()});
+async function downloadZip(){
+ if(!window.JSZip){status('downloadStatus','Could not load the ZIP library. Check your internet connection and refresh.','error');return}
+ const selectedFiles=[];
+ for(const v of matching){
+  const game=(v.game_versions||[]).filter(x=>filters.game.has(x)).sort(sortVersions);
+  const loaders=(v.loaders||[]).filter(x=>filters.loader.has(x)).sort();
+  if(!game.length||!loaders.length)continue;
+  for(const file of (v.files||[])){
+   if(platform==='modrinth'&&!file.url)continue;
+   selectedFiles.push({version:v,file,game:game[0],loader:loaders[0]});
+  }
+ }
+ if(!selectedFiles.length)return;
+ $('downloadBtn').disabled=true;$('progressBar').style.width='0%';status('downloadStatus','Preparing ZIP…');
+ const zip=new JSZip(),folder=zip.folder(cleanName(projectData.title||projectData.slug));
+ let done=0,failed=0;
+ for(const item of selectedFiles){
+  const {version,file,game,loader}=item;
+  try{
+   let downloadUrl=file.url;
+   const headers={};
+   if(platform==='curseforge'){
+    const key=$('cfKey').value.trim();
+    if(!downloadUrl){
+     const r=await cfApi(`${CF_API}/mods/${file.cfModId}/files/${file.cfFileId}/download-url`,key);
+     downloadUrl=r.data;
+    }
+    if(!downloadUrl)throw Error('CurseForge did not provide a download URL for this file.');
+    headers['x-api-key']=key;
+   }
+   const response=await fetch(downloadUrl,{headers});if(!response.ok)throw Error('HTTP '+response.status);
+   const blob=await response.blob();
+   const ext=(file.filename&&file.filename.includes('.'))?file.filename.slice(file.filename.lastIndexOf('.')):'.jar';
+   const base=[cleanName(projectData.title||projectData.slug),cleanName(version.version_number),cleanName(game),cleanName(loader)].join('-');
+   let name=base+ext, suffix=2;while(zip.file(name))name=base+'-'+suffix+++ext;
+   folder.file(name,blob);
+  }catch(e){failed++;console.warn('Could not download',file.filename,e)}
+  done++;$('progressBar').style.width=Math.round(done/selectedFiles.length*100)+'%';
+  $('progressLabel').textContent=`Downloaded ${done} of ${selectedFiles.length} files`;
+  status('downloadStatus',`Downloading files… ${failed?`${failed} failed so far.`:''}`);
+ }
+ try{
+  if(done===failed)throw Error('None of the selected files could be downloaded. Check API permissions, browser CORS restrictions and file availability.');
+  const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:4}},meta=>{$('progressLabel').textContent=`Creating ZIP… ${Math.round(meta.percent)}%`});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=cleanName(projectData.title||projectData.slug)+'.zip';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  $('progressBar').style.width='100%';$('progressLabel').textContent='ZIP ready.';
+  status('downloadStatus',`Finished: ${done-failed} file${done-failed===1?'':'s'} added${failed?`, ${failed} failed`:''}.`,'good');
+ }catch(e){status('downloadStatus',e.message,'error')}
+ finally{$('downloadBtn').disabled=false}
+}
+$('downloadBtn').onclick=downloadZip;
+</script>
+</body></html>
